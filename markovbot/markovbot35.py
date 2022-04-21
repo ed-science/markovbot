@@ -133,7 +133,7 @@ class MarkovBot():
 			
 
 	def clear_data(self, database=None):
-		
+
 		"""Clears the current internal data. NOTE: This does not remove
 		existing pickled data!
 		
@@ -145,7 +145,7 @@ class MarkovBot():
 		"""
 		
 		# Overwrite data
-		if database == None:
+		if database is None:
 			self.data = {'default':{}}
 		else:
 			try:
@@ -156,7 +156,7 @@ class MarkovBot():
 
 	def generate_text(self, maxlength, seedword=None, database=u'default',
 		verbose=False, maxtries=100):
-		
+
 		"""Generates random text based on the provided database.
 		
 		Arguments
@@ -202,7 +202,7 @@ class MarkovBot():
 		# Raise an Exception when no data exists
 		if self.data[database] == {}:
 			self._error(u'generate_text', u"No data is available yet in database '%s'. Did you read any data yet?" % (database))
-		
+
 		# Sometimes, for mysterious reasons, a word duo does not appear as a
 		# key in the database. This results in a KeyError, which is highly
 		# annoying. Because I couldn't quite find the bug that causes this
@@ -210,7 +210,7 @@ class MarkovBot():
 		# with the lazy approach of using a try and except statements. Sorry.
 		error = True
 		attempts = 0
-		
+
 		# Make a single keyword into a list of them
 		if type(seedword) in [str]:
 			seedword = [seedword]
@@ -227,12 +227,12 @@ class MarkovBot():
 				# Shuffle the word duos, so that not the same is
 				# found every time
 				random.shuffle(list(keys))
-				
+
 				# Choose a random seed to fall back on when seedword does
 				# not occur in the keys, or if seedword==None
 				seed = random.randint(0, len(list(keys)))
 				w1, w2 = key_list[seed]
-				
+
 				# Try to find a word duo that contains the seedworded word
 				if seedword != None:
 					# Loop through all potential seed words
@@ -257,10 +257,10 @@ class MarkovBot():
 						# found in the word duos
 						if len(seedword) > 0:
 							seedword.pop(0)
-				
+
 				# Empty list to contain the generated words
 				words = []
-				
+
 				# Loop to get as many words as requested
 				for i in range(maxlength):
 					# Add the current first word
@@ -273,18 +273,18 @@ class MarkovBot():
 					# than once in this list, thus more likely word
 					# combinations are more likely to be selected here.
 					w1, w2 = w2, random.choice(self.data[database][(w1, w2)])
-				
+
 				# Add the final word to the generated words
 				words.append(w2)
-				
+
 				# Capitalise the first word, capitalise all single 'i's,
 				# and attempt to capitalise letters that occur after a
 				# full stop.
-				for i in range(0, len(words)):
+				for i in range(len(words)):
 					if (i == 0) or (u'.' in words[i-1]) or \
 						(words[i] == u'i'):
 						words[i] = words[i].capitalize()
-				
+
 				# Find the last acceptable interpunction by looping
 				# through all generated words, last-to-first, and
 				# checking which is the last word that contains
@@ -312,8 +312,7 @@ class MarkovBot():
 
 				if sentence != u'':
 					error = False
-				
-			# If the above code fails
+
 			except:
 				# Count one more failed attempt
 				attempts += 1
@@ -324,7 +323,7 @@ class MarkovBot():
 				# making any further attempts
 				if attempts >= maxtries:
 					self._error(u'generate_text', u"Made %d attempts to generate text, but all failed. " % (attempts))
-		
+
 		return sentence
 	
 	
@@ -344,7 +343,7 @@ class MarkovBot():
 		
 	
 	def read(self, filename, database=u'default', overwrite=False):
-		
+
 		"""Reads a text, and adds its stats to the internal data. Use the
 		mode keyword to overwrite the existing data, or to add the new
 		reading material to the existing data. NOTE: Only text files can be
@@ -371,11 +370,11 @@ class MarkovBot():
 		# Clear the current data if required
 		if overwrite:
 			self.clear_data(database=database)
-		
+
 		# Check whether the file exists
 		if not self._check_file(filename):
 			self._error(u'read', u"File does not exist: '%s'" % (filename))
-		
+
 		# Read the words from the file as one big string
 		with open(filename, u'r') as f:
 			# Read the contents of the file
@@ -383,16 +382,16 @@ class MarkovBot():
 		# Unicodify the contents
 		contents = contents
 		#.decode(u'utf-8')
-		
+
 		# Split the words into a list
 		words = contents.split()
-		
+
 		# Create a new database if this is required.
-		if not database in self.data.keys():
+		if database not in self.data.keys():
 			self._message(u'read', \
 			u"Creating new database '%s'" % (database))
 			self.data[database] = {}
-		
+
 		# Add the words and their likely following word to the database
 		for w1, w2, w3 in self._triples(words):
 			# Only use actual words and words with minimal interpunction
@@ -457,7 +456,7 @@ class MarkovBot():
 	
 	
 	def set_simple_responses(self, respdict, overwrite=False):
-		
+
 		"""Adds
 		
 		Arguments
@@ -483,13 +482,13 @@ class MarkovBot():
 		
 		# Check if the 'simpleresponse' database already exists, and
 		# create it if necessary.
-		if not u'simpleresponse' in self.data.keys():
+		if u'simpleresponse' not in self.data.keys():
 			self.data[u'simpleresponse'] = {}
-		
+
 		# Overwrite the database if requested.
 		if overwrite:
 			self.data[u'simpleresponse'] = {}
-		
+
 		# Go through the passed respdict, and add its content to the
 		# database.
 		for targetstring in respdict.keys():
@@ -520,7 +519,7 @@ class MarkovBot():
 	def twitter_autoreply_start(self, targetstring, database=u'default',
 		keywords=None, prefix=None, suffix=None, maxconvdepth=None,
 		mindelay=1.5):
-		
+
 		"""Starts the internal Thread that replies to all tweets that match
 		the target string.
 		
@@ -606,15 +605,15 @@ class MarkovBot():
 		if not IMPTWITTER:
 			self._error(u'twitter_autoreply_start', \
 				u"The 'twitter' library could not be imported. Check whether it is installed correctly.")
-		
+
 		# Raise an Exception if the passed intended database is
 		# 'simpleresponse' and the targetstring is not in the keys of the
 		# 'simpleresponse' database.
-		if database == u'simpleresponse':
-			if targetstring not in self.data[u'simpleresponse'].keys():
-				self._error(u'twitter_autoreply_start', \
-					u"Targetstring '%s' was not found in the 'simpleresponse' database. Use the set_simple_responses function to add simple responses." % (targetstring))
-		
+		if (database == u'simpleresponse'
+		    and targetstring not in self.data[u'simpleresponse'].keys()):
+			self._error(u'twitter_autoreply_start', \
+				u"Targetstring '%s' was not found in the 'simpleresponse' database. Use the set_simple_responses function to add simple responses." % (targetstring))
+
 		# Update the autoreply parameters
 		self._autoreply_database = database
 		self._targetstring = targetstring
@@ -623,7 +622,7 @@ class MarkovBot():
 		self._tweetsuffix = suffix
 		self._maxconvdepth = maxconvdepth
 		self._mindelay = mindelay
-		
+
 		# Signal the _autoreply thread to continue
 		self._autoreplying = True
 	
@@ -688,7 +687,7 @@ class MarkovBot():
 	
 	def twitter_tweeting_start(self, database=u'default', days=1, hours=0, \
 		minutes=0, jitter=0, keywords=None, prefix=None, suffix=None):
-		
+
 		"""Periodically posts a new tweet with generated text. You can
 		specify the interval between tweets in days, hours, or minutes, or
 		by using a combination of all. (Not setting anything will result in
@@ -744,13 +743,13 @@ class MarkovBot():
 		if not IMPTWITTER:
 			self._error(u'twitter_tweeting_start', \
 				u"The 'twitter' library could not be imported. Check whether it is installed correctly.")
-		
+
 		# Clean up the values
-		if not(days > 0) or (days == None):
+		if days <= 0 or days is None:
 			days = 0
-		if not(hours > 0) or (hours == None):
+		if hours <= 0 or hours is None:
 			hours = 0
-		if not(minutes > 0) or (minutes == None):
+		if minutes <= 0 or minutes is None:
 			minutes = 0
 		# Calculate the tweet interval in minutes
 		tweetinterval = (days*24*60) + (hours*60) + minutes
@@ -758,7 +757,7 @@ class MarkovBot():
 		# (Thats 24 hours * 60 minutes per hour = 1440 minutes)
 		if tweetinterval == 0:
 			tweetinterval = 1440
-		
+
 		# Update the autotweeting parameters
 		self._tweetingdatabase = database
 		self._tweetinginterval = tweetinterval
@@ -766,7 +765,7 @@ class MarkovBot():
 		self._tweetingkeywords = keywords
 		self._tweetingprefix = prefix
 		self._tweetingsuffix = suffix
-		
+
 		# Signal the _autotweet thread to continue
 		self._autotweeting = True
 	

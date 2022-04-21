@@ -133,7 +133,7 @@ class MarkovBot():
 			
 
 	def clear_data(self, database=None):
-		
+
 		"""Clears the current internal data. NOTE: This does not remove
 		existing pickled data!
 		
@@ -145,7 +145,7 @@ class MarkovBot():
 		"""
 		
 		# Overwrite data
-		if database == None:
+		if database is None:
 			self.data = {'default':{}}
 		else:
 			try:
@@ -341,7 +341,7 @@ class MarkovBot():
 		
 	
 	def read(self, filename, database=u'default', overwrite=False):
-		
+
 		"""Reads a text, and adds its stats to the internal data. Use the
 		mode keyword to overwrite the existing data, or to add the new
 		reading material to the existing data. NOTE: Only text files can be
@@ -368,27 +368,27 @@ class MarkovBot():
 		# Clear the current data if required
 		if overwrite:
 			self.clear_data(database=database)
-		
+
 		# Check whether the file exists
 		if not self._check_file(filename):
 			self._error(u'read', u"File does not exist: '%s'" % (filename))
-		
+
 		# Read the words from the file as one big string
 		with open(filename, u'r') as f:
 			# Read the contents of the file
 			contents = f.read()
 		# Unicodify the contents
 		contents = contents.decode(u'utf-8')
-		
+
 		# Split the words into a list
 		words = contents.split()
-		
+
 		# Create a new database if this is required.
-		if not database in self.data.keys():
+		if database not in self.data.keys():
 			self._message(u'read', \
 			u"Creating new database '%s'" % (database))
 			self.data[database] = {}
-		
+
 		# Add the words and their likely following word to the database
 		for w1, w2, w3 in self._triples(words):
 			# Only use actual words and words with minimal interpunction
@@ -453,7 +453,7 @@ class MarkovBot():
 	
 	
 	def set_simple_responses(self, respdict, overwrite=False):
-		
+
 		"""Adds
 		
 		Arguments
@@ -479,13 +479,13 @@ class MarkovBot():
 		
 		# Check if the 'simpleresponse' database already exists, and
 		# create it if necessary.
-		if not u'simpleresponse' in self.data.keys():
+		if u'simpleresponse' not in self.data.keys():
 			self.data[u'simpleresponse'] = {}
-		
+
 		# Overwrite the database if requested.
 		if overwrite:
 			self.data[u'simpleresponse'] = {}
-		
+
 		# Go through the passed respdict, and add its content to the
 		# database.
 		for targetstring in respdict.keys():
@@ -516,7 +516,7 @@ class MarkovBot():
 	def twitter_autoreply_start(self, targetstring, database=u'default',
 		keywords=None, prefix=None, suffix=None, maxconvdepth=None,
 		mindelay=1.5):
-		
+
 		"""Starts the internal Thread that replies to all tweets that match
 		the target string.
 		
@@ -602,15 +602,15 @@ class MarkovBot():
 		if not IMPTWITTER:
 			self._error(u'twitter_autoreply_start', \
 				u"The 'twitter' library could not be imported. Check whether it is installed correctly.")
-		
+
 		# Raise an Exception if the passed intended database is
 		# 'simpleresponse' and the targetstring is not in the keys of the
 		# 'simpleresponse' database.
-		if database == u'simpleresponse':
-			if targetstring not in self.data[u'simpleresponse'].keys():
-				self._error(u'twitter_autoreply_start', \
-					u"Targetstring '%s' was not found in the 'simpleresponse' database. Use the set_simple_responses function to add simple responses." % (targetstring))
-		
+		if (database == u'simpleresponse'
+		    and targetstring not in self.data[u'simpleresponse'].keys()):
+			self._error(u'twitter_autoreply_start', \
+				u"Targetstring '%s' was not found in the 'simpleresponse' database. Use the set_simple_responses function to add simple responses." % (targetstring))
+
 		# Update the autoreply parameters
 		self._autoreply_database = database
 		self._targetstring = targetstring
@@ -619,7 +619,7 @@ class MarkovBot():
 		self._tweetsuffix = suffix
 		self._maxconvdepth = maxconvdepth
 		self._mindelay = mindelay
-		
+
 		# Signal the _autoreply thread to continue
 		self._autoreplying = True
 	
@@ -684,7 +684,7 @@ class MarkovBot():
 	
 	def twitter_tweeting_start(self, database=u'default', days=1, hours=0, \
 		minutes=0, jitter=0, keywords=None, prefix=None, suffix=None):
-		
+
 		"""Periodically posts a new tweet with generated text. You can
 		specify the interval between tweets in days, hours, or minutes, or
 		by using a combination of all. (Not setting anything will result in
@@ -740,13 +740,13 @@ class MarkovBot():
 		if not IMPTWITTER:
 			self._error(u'twitter_tweeting_start', \
 				u"The 'twitter' library could not be imported. Check whether it is installed correctly.")
-		
+
 		# Clean up the values
-		if not(days > 0) or (days == None):
+		if days <= 0 or days is None:
 			days = 0
-		if not(hours > 0) or (hours == None):
+		if hours <= 0 or hours is None:
 			hours = 0
-		if not(minutes > 0) or (minutes == None):
+		if minutes <= 0 or minutes is None:
 			minutes = 0
 		# Calculate the tweet interval in minutes
 		tweetinterval = (days*24*60) + (hours*60) + minutes
@@ -754,7 +754,7 @@ class MarkovBot():
 		# (Thats 24 hours * 60 minutes per hour = 1440 minutes)
 		if tweetinterval == 0:
 			tweetinterval = 1440
-		
+
 		# Update the autotweeting parameters
 		self._tweetingdatabase = database
 		self._tweetinginterval = tweetinterval
@@ -762,7 +762,7 @@ class MarkovBot():
 		self._tweetingkeywords = keywords
 		self._tweetingprefix = prefix
 		self._tweetingsuffix = suffix
-		
+
 		# Signal the _autotweet thread to continue
 		self._autotweeting = True
 	
@@ -1103,7 +1103,7 @@ class MarkovBot():
 	
 	
 	def _autotweet(self):
-		
+
 		"""Automatically tweets on a periodical basis.
 		"""
 
@@ -1115,7 +1115,7 @@ class MarkovBot():
 			# it is a second late, and checking continuously is a waste of
 			# resources.
 			time.sleep(1)
-			
+
 			# Check whether the Threads are still alive, and revive if
 			# they aren't. (NOTE: This will not actually work if the
 			# auto-tweeting Thread is dead, because that is what's
@@ -1136,23 +1136,18 @@ class MarkovBot():
 						kw = self._tweetingkeywords
 					else:
 						kw = random.choice(self._tweetingkeywords)
-				
+
 				# Choose the database to use. If the database should be
 				# random, then randomly choose a non-empty database.
 				if self._tweetingdatabase == u'random-database':
 					database = random.choice(self.data.keys())
 					while self.data[database] == {} or database == u'simpleresponse':
 						database = random.choice(self.data.keys())
-					self._message(u'_autotweet', \
-						u'Randomly chose database: %s' % (database))
-				# If the database is a list of alternatives, randomly
-				# select one.
+					self._message(u'_autotweet', f'Randomly chose database: {database}')
 				elif type(self._tweetingdatabase) in [list, tuple]:
 					database = random.choice(self._tweetingdatabase)
-				# If the specified database is a string, use it.
 				elif type(self._tweetingdatabase) in [str, unicode]:
 					database = copy.deepcopy(self._tweetingdatabase)
-				# Fall back on the default option.
 				else:
 					self._message(u'_autotweet', \
 						u"Could not recognise the type of database '%s'; using '%s' instead." % (self._tweetingdatabase, u'default'))
@@ -1162,7 +1157,7 @@ class MarkovBot():
 				# specified prefix, which can also be None. Or
 				# we randomly select one from a list of potential
 				# prefixes.
-				if self._tweetingprefix == None:
+				if self._tweetingprefix is None:
 					prefix = copy.deepcopy(self._tweetingprefix)
 				elif type(self._tweetingprefix) in [str, unicode]:
 					prefix = copy.deepcopy(self._tweetingprefix)
@@ -1177,7 +1172,7 @@ class MarkovBot():
 				# specified suffix, which can also be None. Or
 				# we randomly select one from a list of potential
 				# suffixes.
-				if self._tweetingsuffix == None:
+				if self._tweetingsuffix is None:
 					suffix = copy.deepcopy(self._tweetingsuffix)
 				elif type(self._tweetingsuffix) in [str, unicode]:
 					suffix = copy.deepcopy(self._tweetingsuffix)
@@ -1199,8 +1194,7 @@ class MarkovBot():
 					# Post a new tweet
 					tweet = self._t.statuses.update(status=newtweet)
 					# Report to the console
-					self._message(u'_autotweet', \
-						u'Posted tweet: %s' % (newtweet))
+					self._message(u'_autotweet', f'Posted tweet: {newtweet}')
 					# Store a copy of the latest outgoing tweet, for
 					# debugging purposes
 					self._lasttweetout = copy.deepcopy(tweet)
@@ -1212,8 +1206,7 @@ class MarkovBot():
 						# Post a new tweet
 						tweet = self._t.statuses.update(status=newtweet)
 						# Report to the console
-						self._message(u'_autotweet', \
-							u'Posted tweet: %s' % (newtweet))
+						self._message(u'_autotweet', f'Posted tweet: {newtweet}')
 						# Store a copy of the latest outgoing tweet,
 						# for debugging purposes
 						self._lasttweetout = copy.deepcopy(tweet)
@@ -1221,12 +1214,12 @@ class MarkovBot():
 						self._error(u'_autotweet', u"Failed to post a tweet! Error: '%s'" % (e))
 				# Release the twitter lock
 				self._tlock.release()
-				
+
 				# Determine the next tweeting interval in minutes
 				jitter = random.randint(-self._tweetingjitter, \
 					self._tweetingjitter)
 				interval = self._tweetinginterval + jitter
-				
+
 				# Sleep for the interval (in seconds, hence * 60)
 				self._message(u'_autotweet', \
 					u'Next tweet in %d minutes.' % (interval))
@@ -1267,57 +1260,52 @@ class MarkovBot():
 	
 	
 	def _cpr(self):
-		
+
 		"""Checks on the Threads that are supposed to be running, and
 		revives them when they are dead.
 		"""
 		
 		# Check on the auto-reply Thread.
-		if self._autoreplythreadlives:
-			# Check if the Thread is still alive.
-			if not self._autoreplythread.is_alive():
-				# Report on the reviving.
-				self._message(u'_cpr', u'_autoreplythread died; trying to revive!')
-				# Restart the Thread.
-				self._autoreplythread = Thread(target=self._autoreply)
-				self._autoreplythread.daemon = True
-				self._autoreplythread.name = u'autoreplier'
-				self._autoreplythread.start()
-				# Report on success!
-				self._message(u'_cpr', u'Succesfully restarted _autoreplythread!')
+		if self._autoreplythreadlives and not self._autoreplythread.is_alive():
+			# Report on the reviving.
+			self._message(u'_cpr', u'_autoreplythread died; trying to revive!')
+			# Restart the Thread.
+			self._autoreplythread = Thread(target=self._autoreply)
+			self._autoreplythread.daemon = True
+			self._autoreplythread.name = u'autoreplier'
+			self._autoreplythread.start()
+			# Report on success!
+			self._message(u'_cpr', u'Succesfully restarted _autoreplythread!')
 
 		# Check on the tweeting Thread.
-		if self._tweetingthreadlives:
-			# Check if the Thread is still alive.
-			if not self._tweetingthread.is_alive():
-				# Report on the reviving.
-				self._message(u'_cpr', u'_tweetingthread died; trying to revive!')
-				# Restart the Thread.
-				self._tweetingthread = Thread(target=self._autoreply)
-				self._tweetingthread.daemon = True
-				self._tweetingthread.name = u'autotweeter'
-				self._tweetingthread.start()
-				# Report on success!
-				self._message(u'_cpr', u'Succesfully restarted _tweetingthread!')
+		if self._tweetingthreadlives and not self._tweetingthread.is_alive():
+			# Report on the reviving.
+			self._message(u'_cpr', u'_tweetingthread died; trying to revive!')
+			# Restart the Thread.
+			self._tweetingthread = Thread(target=self._autoreply)
+			self._tweetingthread.daemon = True
+			self._tweetingthread.name = u'autotweeter'
+			self._tweetingthread.start()
+			# Report on success!
+			self._message(u'_cpr', u'Succesfully restarted _tweetingthread!')
 
 		# Check on the self-examination Thread.
-		if self._selfexaminationthreadlives:
-			# Check if the Thread is still alive.
-			if not self._selfexaminationthread.is_alive():
-				# Report on the reviving.
-				self._message(u'_cpr', u'Ironically, _selfexaminationthread died; trying to revive!')
-				# Restart the Thread.
-				self._selfexaminationthread = Thread(self._self_examination)
-				self._selfexaminationthread.daemon = True
-				self._selfexaminationthread.name = u'selfexaminer'
-				self._selfexaminationthread.start()
-				# Report on success!
-				self._message(u'_cpr', u'Succesfully restarted _selfexaminationthread!')
+		if (self._selfexaminationthreadlives
+		    and not self._selfexaminationthread.is_alive()):
+			# Report on the reviving.
+			self._message(u'_cpr', u'Ironically, _selfexaminationthread died; trying to revive!')
+			# Restart the Thread.
+			self._selfexaminationthread = Thread(self._self_examination)
+			self._selfexaminationthread.daemon = True
+			self._selfexaminationthread.name = u'selfexaminer'
+			self._selfexaminationthread.start()
+			# Report on success!
+			self._message(u'_cpr', u'Succesfully restarted _selfexaminationthread!')
 
 	
 	def _construct_tweet(self, database=u'default', seedword=None, \
 		prefix=None, suffix=None):
-		
+
 		"""Constructs a text for a tweet, based on the current Markov chain.
 		The text will be of a length of 140 characters or less, and will
 		contain a maximum of 20 words (excluding the prefix and suffix)
@@ -1352,25 +1340,25 @@ class MarkovBot():
 
 		sl = 20
 		response = u''
-		while response == u'' or len(response) > 140:
+		while not response or len(response) > 140:
 			# Generate some random text
 			response = self.generate_text(sl, seedword=seedword, \
 				database=database, verbose=False, maxtries=100)
 			# Add the prefix
 			if prefix != None:
-				response = u'%s %s' % (prefix, response)
+				response = f'{prefix} {response}'
 			# Add the suffix
 			if suffix != None:
-				response = u'%s %s' % (response, suffix)
+				response = f'{response} {suffix}'
 			# Reduce the amount of words if the response is too long
 			if len(response) > 140:
 				sl -= 1
-		
+
 		return response
 	
 	
 	def _error(self, methodname, msg):
-		
+
 		"""Raises an Exception on behalf of the method involved.
 		
 		Arguments
@@ -1381,11 +1369,11 @@ class MarkovBot():
 		message		-	String with the error message.
 		"""
 		
-		raise Exception(u"ERROR in Markovbot.%s: %s" % (methodname, msg))
+		raise Exception(f"ERROR in Markovbot.{methodname}: {msg}")
 
 
 	def _isalphapunct(self, string):
-		
+
 		"""Returns True if all characters in the passed string are
 		alphabetic or interpunction, and there is at least one character in
 		the string.
@@ -1403,16 +1391,14 @@ class MarkovBot():
 						(True) or not (False).
 		"""
 		
-		if string.replace(u'.',u'').replace(u',',u'').replace(u';',u''). \
-			replace(u':',u'').replace(u'!',u'').replace(u'?',u''). \
-			replace(u"'",u'').isalpha():
-			return True
-		else:
-			return False
+		return bool(
+		    string.replace(u'.', u'').replace(u',', u'').replace(u';', u'').replace(
+		        u':', u'').replace(u'!', u'').replace(u'?', u'').replace(
+		            u"'", u'').isalpha())
 	
 	
 	def _message(self, methodname, msg):
-		
+
 		"""Prints a message on behalf of the method involved. Friendly
 		verion of self._error
 		
@@ -1424,7 +1410,7 @@ class MarkovBot():
 		message		-	String with the error message.
 		"""
 		
-		print(u"MSG from Markovbot.%s: %s" % (methodname, msg))
+		print(f"MSG from Markovbot.{methodname}: {msg}")
 
 
 	def _self_examination(self):
